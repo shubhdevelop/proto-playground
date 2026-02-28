@@ -17,7 +17,6 @@ type ValkeyCommand struct {
 	Client *glide.ClusterClient
 }
 
-// ✅ FIXED: Return error instead of ignoring it
 func NewValkey(ctx context.Context) (*ValkeyCommand, error) {
 	client, err := ValkeyInit(ctx)
 	if err != nil {
