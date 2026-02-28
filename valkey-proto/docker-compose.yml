@@ -1,0 +1,168 @@
+services:
+  valkey0:
+    image: bitnami/valkey:latest
+    container_name: valkey0
+    hostname: valkey0
+    ports:
+      - "6379:6379"
+      - "16379:16379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    command:
+      - valkey-server
+      - --port
+      - "6379"
+      - --protected-mode
+      - "no"
+      - --cluster-enabled
+      - "yes"
+      - --cluster-config-file
+      - /bitnami/valkey/data/nodes.conf
+      - --cluster-node-timeout
+      - "5000"
+      - --dir
+      - /bitnami/valkey/data
+      - --appendonly
+      - "yes"
+      - --bind
+      - "0.0.0.0"
+    volumes:
+      - valkey_data_0:/bitnami/valkey/data
+    networks:
+      - valkey-net
+
+  valkey1:
+    image: bitnami/valkey:latest
+    container_name: valkey1
+    hostname: valkey1
+    ports:
+      - "6380:6379"
+      - "16380:16379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    command:
+      - valkey-server
+      - --port
+      - "6379"
+      - --protected-mode
+      - "no"
+      - --cluster-enabled
+      - "yes"
+      - --cluster-config-file
+      - /bitnami/valkey/data/nodes.conf
+      - --cluster-node-timeout
+      - "5000"
+      - --dir
+      - /bitnami/valkey/data
+      - --appendonly
+      - "yes"
+      - --bind
+      - "0.0.0.0"
+    volumes:
+      - valkey_data_1:/bitnami/valkey/data
+    networks:
+      - valkey-net
+
+  valkey2:
+    image: bitnami/valkey:latest
+    container_name: valkey2
+    hostname: valkey2
+    ports:
+      - "6381:6379"
+      - "16381:16379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    command:
+      - valkey-server
+      - --port
+      - "6379"
+      - --protected-mode
+      - "no"
+      - --cluster-enabled
+      - "yes"
+      - --cluster-config-file
+      - /bitnami/valkey/data/nodes.conf
+      - --cluster-node-timeout
+      - "5000"
+      - --dir
+      - /bitnami/valkey/data
+      - --appendonly
+      - "yes"
+      - --bind
+      - "0.0.0.0"
+    volumes:
+      - valkey_data_2:/bitnami/valkey/data
+    networks:
+      - valkey-net
+
+  valkey3:
+    image: bitnami/valkey:latest
+    container_name: valkey3
+    hostname: valkey3
+    ports:
+      - "6382:6379"
+      - "16382:16379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    command:
+      - valkey-server
+      - --port
+      - "6379"
+      - --protected-mode
+      - "no"
+      - --cluster-enabled
+      - "yes"
+      - --cluster-config-file
+      - /bitnami/valkey/data/nodes.conf
+      - --cluster-node-timeout
+      - "5000"
+      - --dir
+      - /bitnami/valkey/data
+      - --appendonly
+      - "yes"
+      - --bind
+      - "0.0.0.0"
+    volumes:
+      - valkey_data_3:/bitnami/valkey/data
+    networks:
+      - valkey-net
+
+  cluster-init:
+    image: bitnami/valkey:latest
+    depends_on:
+      - valkey0
+      - valkey1
+      - valkey2
+      - valkey3
+    networks:
+      - valkey-net
+    command: >
+      bash -c " echo 'Waiting for nodes...' && sleep 10 && echo 'Creating cluster with internal hostnames...' && valkey-cli --cluster create  valkey0:6379  valkey1:6379  valkey2:6379  valkey3:6379  --cluster-replicas 1  --cluster-yes && echo 'Cluster created successfully!' && valkey-cli -h valkey0 -p 6379 cluster nodes && echo 'Cluster is ready!' "
+
+  # Your Go application
+  app:
+    build: .
+    container_name: myapp
+    depends_on:
+      - valkey0
+      - valkey1
+      - valkey2
+      - valkey3
+      - cluster-init
+    environment:
+      - VALKEY_HOST=valkey0
+      - VALKEY_PORT=6379
+    networks:
+      - valkey-net
+    ports:
+      - "8080:8080" # Adjust to your app's port
+
+networks:
+  valkey-net:
+    driver: bridge
+
+volumes:
+  valkey_data_0:
+  valkey_data_1:
+  valkey_data_2:
+  valkey_data_3:
