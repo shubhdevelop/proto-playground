@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"time"
 
 	glide "github.com/valkey-io/valkey-glide/go/v2"
@@ -29,8 +31,21 @@ func NewValkey(ctx context.Context) (*ValkeyCommand, error) {
 func ValkeyInit(ctx context.Context) (*glide.ClusterClient, error) {
 	log.Println("Connecting to Valkey cluster...")
 
+	host := os.Getenv("VALKEY_HOST")
+	if host == "" {
+		host = "Shubhams-MacBook-Pro.local" // Default to the host's mDNS name for cluster access
+	}
+	portStr := os.Getenv("VALKEY_PORT")
+	port := 6379
+	if portStr != "" {
+		if p, err := strconv.Atoi(portStr); err == nil {
+			port = p
+		}
+	}
+
+	log.Printf("Connecting to seed node: %s:%d", host, port)
 	clientConfig := config.NewClusterClientConfiguration().
-		WithAddress(&config.NodeAddress{Host: "valkey0", Port: 6379}).
+		WithAddress(&config.NodeAddress{Host: host, Port: port}).
 		WithRequestTimeout(10 * time.Second).WithReadFrom(config.PreferReplica) // Optional: read from replicas
 
 	log.Println("Creating cluster client...")

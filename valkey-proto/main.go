@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	commands "github.com/shubhdevelop/proto-playground/valkey-proto/internals"
 )
 
 func main() {
-	time.Sleep(30 * time.Second)
 	ctx := context.Background()
 	fmt.Println("Valkey Proto playground")
 

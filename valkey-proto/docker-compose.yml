@@ -26,10 +26,19 @@ services:
       - "yes"
       - --bind
       - "0.0.0.0"
+      - --cluster-announce-ip
+      - Shubhams-MacBook-Pro.local
+      - --cluster-announce-port
+      - "6379"
+      - --cluster-announce-bus-port
+      - "16379"
     volumes:
       - valkey_data_0:/bitnami/valkey/data
     networks:
       - valkey-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "Shubhams-MacBook-Pro.local:host-gateway"
 
   valkey1:
     image: bitnami/valkey:latest
@@ -58,10 +67,19 @@ services:
       - "yes"
       - --bind
       - "0.0.0.0"
+      - --cluster-announce-ip
+      - Shubhams-MacBook-Pro.local
+      - --cluster-announce-port
+      - "6380"
+      - --cluster-announce-bus-port
+      - "16380"
     volumes:
       - valkey_data_1:/bitnami/valkey/data
     networks:
       - valkey-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "Shubhams-MacBook-Pro.local:host-gateway"
 
   valkey2:
     image: bitnami/valkey:latest
@@ -90,10 +108,19 @@ services:
       - "yes"
       - --bind
       - "0.0.0.0"
+      - --cluster-announce-ip
+      - Shubhams-MacBook-Pro.local
+      - --cluster-announce-port
+      - "6381"
+      - --cluster-announce-bus-port
+      - "16381"
     volumes:
       - valkey_data_2:/bitnami/valkey/data
     networks:
       - valkey-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "Shubhams-MacBook-Pro.local:host-gateway"
 
   valkey3:
     image: bitnami/valkey:latest
@@ -122,10 +149,19 @@ services:
       - "yes"
       - --bind
       - "0.0.0.0"
+      - --cluster-announce-ip
+      - Shubhams-MacBook-Pro.local
+      - --cluster-announce-port
+      - "6382"
+      - --cluster-announce-bus-port
+      - "16382"
     volumes:
       - valkey_data_3:/bitnami/valkey/data
     networks:
       - valkey-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "Shubhams-MacBook-Pro.local:host-gateway"
 
   cluster-init:
     image: bitnami/valkey:latest
@@ -136,26 +172,31 @@ services:
       - valkey3
     networks:
       - valkey-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "Shubhams-MacBook-Pro.local:host-gateway"
     command: >
-      bash -c " echo 'Waiting for nodes...' && sleep 10 && echo 'Creating cluster with internal hostnames...' && valkey-cli --cluster create  valkey0:6379  valkey1:6379  valkey2:6379  valkey3:6379  --cluster-replicas 1  --cluster-yes && echo 'Cluster created successfully!' && valkey-cli -h valkey0 -p 6379 cluster nodes && echo 'Cluster is ready!' "
-
+      bash -c " echo 'Waiting for nodes...' && sleep 10 && echo 'Creating cluster with Shubhams-MacBook-Pro.local addresses...' && valkey-cli --cluster create  Shubhams-MacBook-Pro.local:6379  Shubhams-MacBook-Pro.local:6380  Shubhams-MacBook-Pro.local:6381  Shubhams-MacBook-Pro.local:6382  --cluster-replicas 1  --cluster-yes && echo 'Cluster created successfully!' && valkey-cli -h valkey0 -p 6379 cluster nodes && echo 'Cluster is ready!' "
   # Your Go application
-  app:
-    build: .
-    container_name: myapp
-    depends_on:
-      - valkey0
-      - valkey1
-      - valkey2
-      - valkey3
-      - cluster-init
-    environment:
-      - VALKEY_HOST=valkey0
-      - VALKEY_PORT=6379
-    networks:
-      - valkey-net
-    ports:
-      - "8080:8080" # Adjust to your app's port
+  # app:
+  #   build: .
+  #   container_name: myapp
+  #   depends_on:
+  #     - valkey0
+  #     - valkey1
+  #     - valkey2
+  #     - valkey3
+  #     - cluster-init
+  #   environment:
+  #     - VALKEY_HOST=Shubhams-MacBook-Pro.local
+  #     - VALKEY_PORT=6379
+  #   networks:
+  #     - valkey-net
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #     - "Shubhams-MacBook-Pro.local:host-gateway"
+  #   ports:
+  #     - "8080:8080" # Adjust to your app's port
 
 networks:
   valkey-net:
